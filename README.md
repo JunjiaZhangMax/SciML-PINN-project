@@ -3,7 +3,11 @@
 供小组自己实现的项目骨架。目标：通过连续时间 PINN 联合识别 Navier–Stokes
 系数并重建速度/压力，研究速度观测噪声与稀疏性的影响。
 
-**状态：配置工具与命令行可用；科研计算均为 TODO。未下载数据、训练或产生实验结果。**
+**首次了解项目，建议先读 [从零理解项目：NS 方程、PINN 原理与实验设计](docs/PROJECT_GUIDE.md)。**
+
+English: [Project guide — NS equations, PINN principles, and experiment design](docs/PROJECT_GUIDE.en.md).
+
+**状态：参考数据已下载核验，快照与动画脚本可用；配置工具与命令行可用。PINN 核心训练和评估仍为 TODO，尚无模型训练结果。**
 
 ## 目录与职责
 

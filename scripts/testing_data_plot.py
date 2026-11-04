@@ -24,7 +24,7 @@ p = data["p_star"][:, k]
 p = p - p.mean()  # 去掉该时刻的空间平均压力
 
 fig, axes = plt.subplots(
-    3, 1, figsize=(10, 8), layout="constrained"
+    3, 1, figsize=(4, 8), layout="tight"
 )
 
 for ax, values, label in zip(
@@ -36,6 +36,9 @@ for ax, values, label in zip(
     fig.colorbar(contour, ax=ax, label=label)
     ax.set(xlabel="x", ylabel="y", title=label)
     ax.set_aspect("equal")
+
+# Save the figure as a PNG file to the directory "output"
+fig.savefig("output/reference_flow.png", dpi=300, bbox_inches="tight")
 
 fig.suptitle(f"Reference flow at t={times[k]:.2f}")
 plt.show()
