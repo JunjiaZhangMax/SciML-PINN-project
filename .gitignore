@@ -6,6 +6,4 @@ data/raw/
 data/processed/
 runs/*
 !runs/.gitkeep
-output/*
-!output/.gitkeep
 .pytest_cache/
