@@ -1,4 +1,4 @@
-"""Working project/config CLI; scientific commands dispatch to explicit TODOs."""
+"""Project CLI for configurations, training, evaluation, and remaining scaffolds."""
 
 import argparse
 import json
@@ -8,19 +8,18 @@ from .config import Config, suite
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="SciML PINN scaffold; algorithms are not implemented yet.")
+    parser = argparse.ArgumentParser(description="SciML cylinder PINN training and evaluation.")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("plan", help="List 25 configurations without executing them")
     export = commands.add_parser("init-configs", help="Export JSON configs; refuse overwrites")
     export.add_argument("--output", type=Path, default=Path("configs/generated"))
     download = commands.add_parser("download", help="TODO: acquire dataset")
     download.add_argument("--data", type=Path, default=Path("data/raw/cylinder_nektar_wake.mat"))
-    train = commands.add_parser("train", help="TODO: train one experiment")
+    train = commands.add_parser("train", help="Train one experiment; save logs, checkpoint, and evaluation")
     train.add_argument("--config", type=Path, required=True)
     train.add_argument("--data", type=Path, default=Path("data/raw/cylinder_nektar_wake.mat"))
     train.add_argument("--runs", type=Path, default=Path("runs"))
-    train.add_argument("--resume", action="store_true")
-    evaluate = commands.add_parser("evaluate", help="TODO: evaluate checkpoint")
+    evaluate = commands.add_parser("evaluate", help="Re-evaluate a saved checkpoint on its fixed test set")
     evaluate.add_argument("--run", type=Path, required=True)
     evaluate.add_argument("--data", type=Path, default=Path("data/raw/cylinder_nektar_wake.mat"))
     plot = commands.add_parser("plot", help="TODO: run figures or summary")
@@ -55,10 +54,10 @@ def main(argv=None):
             download(args.data)
         elif args.command == "train":
             from .train import train
-            train(Config.load(args.config), args.data, args.runs, args.resume)
+            print(train(Config.load(args.config), args.data, args.runs))
         elif args.command == "evaluate":
             from .evaluate import evaluate
-            evaluate(args.run, args.data)
+            print(json.dumps(evaluate(args.run, args.data), indent=2))
         elif args.command == "plot":
             from .plotting import plot_run, plot_summary
             if args.run:

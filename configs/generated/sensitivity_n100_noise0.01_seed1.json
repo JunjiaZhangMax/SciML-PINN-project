@@ -26,5 +26,10 @@
   "log_every": 100,
   "checkpoint_every": 1000,
   "device": "auto",
-  "purpose": "production"
+  "purpose": "production",
+  "w_observation": 1.0,
+  "w_initial": 1.0,
+  "w_boundary": 1.0,
+  "w_residual": 1.0,
+  "w_gauge": 1.0
 }

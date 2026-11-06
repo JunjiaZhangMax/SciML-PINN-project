@@ -7,20 +7,22 @@
 
 English: [Project guide — NS equations, PINN principles, and experiment design](docs/PROJECT_GUIDE.en.md).
 
-**状态：参考数据已下载核验，快照与动画脚本可用；配置工具与命令行可用。PINN 核心训练和评估仍为 TODO，尚无模型训练结果。**
+**状态：数据准备、正反问题训练、日志、最终模型保存和训练后评估可用；快照与参考动画脚本可用。当前训练为简化版，不支持断点恢复。批量调度与结果汇总绘图仍待实现。短训练用于验证流程，不代表正式研究结论。**
+
+训练说明见 [运行训练与检查结果](docs/TRAINING.md)。
 
 ## 目录与职责
 
 ```text
 sciml/
   config.py       配置、JSON 读写、25 次实验定义（已实现）
-  cli.py          参数解析与调用入口（已实现，算法命令指向 TODO）
-  data.py         数据加载、抽样、加噪接口
-  model.py        网络与待识别参数接口
-  physics.py      自动微分、速度与 PDE 残差接口
-  losses.py       数据损失与物理损失接口
-  train.py        Adam/L-BFGS、日志和恢复接口
-  evaluate.py     参数、速度和压力评估接口
+  cli.py          参数解析、训练与评估入口
+  data.py         数据加载、初边界准备、抽样与加噪
+  model.py        网络与固定/待识别参数
+  physics.py      自动微分、速度与 PDE 残差
+  losses.py       正反问题各项损失
+  train.py        Adam/L-BFGS、分块梯度、日志和恢复
+  evaluate.py     固定测试集、压力去均值评估与预测导出
   experiments.py  分阶段批量实验与基线检查接口
   plotting.py     单次实验和统计汇总图接口
 configs/          默认配置与 25 次实验清单
@@ -51,12 +53,17 @@ python -m sciml plan
 python -m sciml init-configs --output configs/my_protocol
 ```
 
-下面是将来的接口用法；**先完成对应 TODO，当前执行会明确报未实现**：
+先用短训练配置验证运行环境：
+
+```powershell
+python -m sciml train --config configs/smoke_forward.json
+python -m sciml evaluate --run runs/smoke_forward
+```
+
+下载命令、批量调度和汇总绘图仍是待实现接口：
 
 ```powershell
 python -m sciml download
-python -m sciml train --config configs/generated/known_n5000_noise0_seed0.json
-python -m sciml evaluate --run runs/known_n5000_noise0_seed0
 python -m sciml plot --run runs/known_n5000_noise0_seed0
 python -m sciml batch --stage reference
 python -m sciml plot --runs runs
@@ -82,8 +89,8 @@ python -m compileall -q sciml tests
 python -m unittest discover -s tests -v
 ```
 
-算法测试当前标记为 skipped：请实现测试并移除 skip。
-语法检查或跳过的测试不能证明算法正确。
+已实现的单元与集成测试覆盖数据、损失、训练恢复和评估。
+test_acceptance.py 中七项早期占位仍标记 skipped，不能视为验证通过。
 
 ## 参考
 
