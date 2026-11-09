@@ -10,7 +10,7 @@ from scipy.io import savemat
 import torch
 
 from sciml.config import Config
-from sciml.data import WakeData, coordinates_at, load_data, prepare_data, prepare_forward_data, velocities_at
+from sciml.data import WakeData, coordinates_at, load_data, prepare_inverse_data as prepare_data, prepare_forward_data, velocities_at
 from sciml.losses import forward_objective, inverse_objective
 from sciml.model import PINN
 from sciml.train import prepare_training_data

@@ -1,5 +1,21 @@
 # 参考流场动画
 
+## 训练结果与真值并排动画
+
+```powershell
+python scripts/animate_comparison.py --run runs/forward_full_adam_20261109
+```
+
+生成 `output/forward_comparison.html`，左侧为最终 PINN 预测、右侧为参考值，三行分别为 u、v、p。
+两侧同步播放全部 200 个时刻；每个变量使用跨时刻、跨预测和真值统一的色标。
+压力逐时刻分别去全空间均值。原始规则网格直接显示，不进行时间插值。
+这是最终模型随物理时间变化的动画，不是模型训练过程动画。
+
+同时保存静态预览 `.png`、来源记录 `.source.json`，以及运行目录中的全时空数值 `animation_fields.npz`。
+无 GPU 时可加 `--device cpu`。用 `--stride 2` 可减少输出帧数。
+
+## 仅真值动画
+
 脚本使用同一个 `cylinder_nektar_wake.mat`，不涉及 PINN 训练。
 输出同步变化的 u、v、逐时刻去空间均值的 p；色标在整个时间范围内固定。
 HTML 自带播放、暂停、进度滑块、逐帧和调速按钮，可离线打开。

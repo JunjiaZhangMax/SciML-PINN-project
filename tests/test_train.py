@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 from scipy.io import savemat
@@ -20,6 +21,30 @@ from sciml.train import prepare_training_data, train
 
 
 class TrainingTests(unittest.TestCase):
+    def test_resume_matches_uninterrupted_adam(self):
+        config = replace(self.config, adam_steps=4, checkpoint_every=2)
+        full = train(replace(config, name="full"), self.data, self.root / "runs")
+        original_step = torch.optim.Adam.step
+        calls = 0
+
+        def interrupt(optimizer, *args, **kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 4:
+                raise KeyboardInterrupt
+            return original_step(optimizer, *args, **kwargs)
+
+        with patch.object(torch.optim.Adam, "step", interrupt):
+            with self.assertRaises(KeyboardInterrupt):
+                train(config, self.data, self.root / "runs")
+        run = self.root / "runs" / config.name
+        self.assertEqual(load_checkpoint(run / "checkpoint.pt")["progress"]["adam_steps"], 2)
+        train(config, self.data, self.root / "runs", resume=True)
+        expected = load_checkpoint(full / "checkpoint.pt")["model"]
+        actual = load_checkpoint(run / "checkpoint.pt")["model"]
+        for key in expected:
+            torch.testing.assert_close(actual[key], expected[key], rtol=0, atol=0)
+
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)

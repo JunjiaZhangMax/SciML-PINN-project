@@ -32,11 +32,17 @@ runs/name/ 保存：
 - config.json：实验设置。
 - samples.npz：训练数据、采样索引和坐标范围，不包含压力标签。
 - history.csv：各项损失、两个系数及耗时。
-- checkpoint.pt：最终模型、训练步数、耗时及用于评估的文件指纹。
+- checkpoint.pt：最近保存的模型、Adam 状态、训练步数、耗时及用于评估的文件指纹。
 - metrics.json：独立测试集上的速度、压力和系数误差。
 - predictions.npz：测试预测和三个时刻的完整空间快照。
 
-简化版仅在训练结束时保存模型，不支持断点恢复；不再生成 status.json 和 provenance.json。旧配置中的 lbfgs_steps、lbfgs_history、physics_batch_size 和 checkpoint_every 为兼容保留，当前训练不使用它们。实际步数由 adam_steps 决定，学习率由 adam_lr 决定。
+checkpoint_every 控制定期保存间隔，训练结束也会保存。中断后使用同一份配置和数据恢复：
+
+```powershell
+python -m sciml train --config configs/forward_full_adam_20261109.json --resume
+```
+
+恢复从最近检查点接续，检查点之后的未保存步骤需要重算。旧运行若没有 checkpoint.pt，无法恢复。当前网络无随机层，恢复会加载模型和 Adam 状态。旧配置中的 lbfgs_steps、lbfgs_history 和 physics_batch_size 不再使用。实际步数由 adam_steps 决定，学习率由 adam_lr 决定。
 
 ## 单独评估
 

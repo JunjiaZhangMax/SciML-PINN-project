@@ -19,6 +19,7 @@ def main(argv=None):
     train.add_argument("--config", type=Path, required=True)
     train.add_argument("--data", type=Path, default=Path("data/raw/cylinder_nektar_wake.mat"))
     train.add_argument("--runs", type=Path, default=Path("runs"))
+    train.add_argument("--resume", action="store_true", help="Continue from the last Adam checkpoint")
     evaluate = commands.add_parser("evaluate", help="Re-evaluate a saved checkpoint on its fixed test set")
     evaluate.add_argument("--run", type=Path, required=True)
     evaluate.add_argument("--data", type=Path, default=Path("data/raw/cylinder_nektar_wake.mat"))
@@ -54,7 +55,7 @@ def main(argv=None):
             download(args.data)
         elif args.command == "train":
             from .train import train
-            print(train(Config.load(args.config), args.data, args.runs))
+            print(train(Config.load(args.config), args.data, args.runs, resume=args.resume))
         elif args.command == "evaluate":
             from .evaluate import evaluate
             print(json.dumps(evaluate(args.run, args.data), indent=2))
