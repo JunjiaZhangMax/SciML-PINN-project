@@ -8,7 +8,7 @@ import time
 import torch
 from torch import optim
 
-from ._artifacts import load_checkpoint, save_arrays, save_checkpoint, sha256
+from ._artifacts import load_checkpoint, save_arrays, save_checkpoint, sha256, write_json
 from .config import Config
 from .data import DEFAULT_DATA, ForwardData, PreparedData, load_data, prepare_inverse_data, prepare_forward_data
 from .evaluate import evaluate
@@ -123,31 +123,55 @@ def train(config: Config, data_path: Path = DEFAULT_DATA,
             writer.writerows(rows)
         print(f"Resuming Adam at step {step}", flush=True)
 
+    saved_step = step
+
     def persist():
+        nonlocal saved_step
+        # A diverged model must never replace the last usable checkpoint.
+        if not all(torch.isfinite(value).all() for value in model.parameters()):
+            raise FloatingPointError(f"Nonfinite model parameters after Adam step {step}")
         save_checkpoint(checkpoint_path, {
             **identity, "model": model.state_dict(), "adam": adam.state_dict(),
             "progress": {"adam_steps": step, "lbfgs_steps": 0,
                          "training_seconds": previous_seconds + time.perf_counter() - started},
         })
+        saved_step = step
 
-    if not resume:
-        record("initial", 0)
-        persist()
-    for step in range(step + 1, config.adam_steps + 1):
-        adam.zero_grad(set_to_none=True)
-        # Coordinate gradients are not optimized; clear them between steps.
-        for tensor in prepared.loss_inputs.values():
-            tensor.grad = None
-        losses = objective(model, **prepared.loss_inputs, **weights)
-        losses["total"].backward()
-        adam.step()
-        del losses
-        if step == 1 or step % config.log_every == 0 or step == config.adam_steps:
-            record("adam", step)
-        if step % config.checkpoint_every == 0 or step == config.adam_steps:
+    def set_status(state, reason=None):
+        write_json(run_dir / "status.json", {
+            "state": state, "reason": reason, "checkpoint_adam_steps": saved_step,
+            "target_adam_steps": config.adam_steps})
+
+    try:
+        if not resume:
+            record("initial", 0)
             persist()
+        set_status("running")
+        for step in range(step + 1, config.adam_steps + 1):
+            adam.zero_grad(set_to_none=True)
+            # Coordinate gradients are not optimized; clear them between steps.
+            for tensor in prepared.loss_inputs.values():
+                tensor.grad = None
+            losses = objective(model, **prepared.loss_inputs, **weights)
+            if not torch.isfinite(losses["total"]):
+                raise FloatingPointError(f"Nonfinite loss at Adam step {step}")
+            losses["total"].backward()
+            adam.step()
+            del losses
+            if step == 1 or step % config.log_every == 0 or step == config.adam_steps:
+                record("adam", step)
+            if step % config.checkpoint_every == 0 or step == config.adam_steps:
+                persist()
 
-    # 3. Save the final model and evaluate on the held-out test set.
-    evaluate(run_dir, data_path)
+        # 3. Save the final model and evaluate on the held-out test set.
+        evaluate(run_dir, data_path)
+    except KeyboardInterrupt:
+        set_status("interrupted", "KeyboardInterrupt")
+        raise
+    except Exception as error:
+        # Keep the failure on record; the last finite checkpoint stays resumable.
+        set_status("failed", f"{type(error).__name__}: {error}")
+        raise
+    set_status("completed")
     print(f"Saved run: {run_dir}", flush=True)
     return run_dir
