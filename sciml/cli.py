@@ -13,7 +13,7 @@ def main(argv=None):
     commands.add_parser("plan", help="List 25 configurations without executing them")
     export = commands.add_parser("init-configs", help="Export JSON configs; refuse overwrites")
     export.add_argument("--output", type=Path, default=Path("configs/generated"))
-    download = commands.add_parser("download", help="TODO: acquire dataset")
+    download = commands.add_parser("download", help="Fetch the reference MAT and verify its SHA256")
     download.add_argument("--data", type=Path, default=Path("data/raw/cylinder_nektar_wake.mat"))
     train = commands.add_parser("train", help="Train one experiment; save logs, checkpoint, and evaluation")
     train.add_argument("--config", type=Path, required=True)
@@ -23,7 +23,7 @@ def main(argv=None):
     evaluate = commands.add_parser("evaluate", help="Re-evaluate a saved checkpoint on its fixed test set")
     evaluate.add_argument("--run", type=Path, required=True)
     evaluate.add_argument("--data", type=Path, default=Path("data/raw/cylinder_nektar_wake.mat"))
-    plot = commands.add_parser("plot", help="TODO: run figures or summary")
+    plot = commands.add_parser("plot", help="Loss/coefficient curves for --run; --runs summary is TODO")
     source = plot.add_mutually_exclusive_group(required=True)
     source.add_argument("--run", type=Path)
     source.add_argument("--runs", type=Path)
@@ -62,7 +62,7 @@ def main(argv=None):
         elif args.command == "plot":
             from .plotting import plot_run, plot_summary
             if args.run:
-                plot_run(args.run, args.output)
+                print(plot_run(args.run, args.output))
             else:
                 plot_summary(args.runs, args.output)
         elif args.command == "batch":
