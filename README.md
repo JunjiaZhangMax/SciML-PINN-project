@@ -7,7 +7,7 @@
 
 English: [Project guide — NS equations, PINN principles, and experiment design](docs/PROJECT_GUIDE.en.md).
 
-**状态：数据准备、正反问题 Adam 训练、日志、定期模型保存、断点恢复和训练后评估可用；快照与参考动画脚本可用。批量调度与结果汇总绘图仍待实现。短训练用于验证流程，不代表正式研究结论。**
+**状态：数据下载校验、数据准备、正反问题 Adam 训练、日志、定期模型保存、断点恢复、失败记录、训练后评估和单次运行曲线图可用；快照与参考动画脚本可用。批量调度与结果汇总绘图仍待实现。短训练用于验证流程，不代表正式研究结论。**
 
 训练说明见 [运行训练与检查结果](docs/TRAINING.md)。
 
@@ -60,11 +60,16 @@ python -m sciml train --config configs/smoke_forward.json
 python -m sciml evaluate --run runs/smoke_forward
 ```
 
-下载命令、批量调度和汇总绘图仍是待实现接口：
+下载并校验参考数据、绘制单次运行的损失与系数曲线：
 
 ```powershell
 python -m sciml download
-python -m sciml plot --run runs/known_n5000_noise0_seed0
+python -m sciml plot --run runs/smoke_forward
+```
+
+批量调度和汇总绘图仍是待实现接口：
+
+```powershell
 python -m sciml batch --stage reference
 python -m sciml plot --runs runs
 ```

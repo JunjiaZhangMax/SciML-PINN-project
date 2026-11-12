@@ -102,6 +102,73 @@ class TrainingTests(unittest.TestCase):
                 with self.assertRaises(FileExistsError):
                     train(config, self.data, self.root / "runs")
 
+    def test_status_records_completed_and_interrupted_runs(self):
+        run = train(self.config, self.data, self.root / "runs")
+        status = json.loads((run / "status.json").read_text())
+        self.assertEqual((status["state"], status["checkpoint_adam_steps"]), ("completed", 3))
+        with patch.object(torch.optim.Adam, "step", side_effect=KeyboardInterrupt):
+            with self.assertRaises(KeyboardInterrupt):
+                train(replace(self.config, name="stopped"), self.data, self.root / "runs")
+        status = json.loads((self.root / "runs" / "stopped" / "status.json").read_text())
+        self.assertEqual((status["state"], status["checkpoint_adam_steps"]), ("interrupted", 0))
+
+    def test_nonfinite_loss_stops_and_keeps_last_finite_checkpoint(self):
+        config = replace(self.config, name="diverged", mode="inverse", adam_steps=6,
+                         checkpoint_every=2, log_every=2)
+        calls = 0
+
+        def diverging(*args, **kwargs):
+            nonlocal calls
+            calls += 1
+            losses = inverse_objective(*args, **kwargs)
+            if calls >= 7:  # initial log, steps 1-3, logs at steps 1 and 2, then step 4
+                losses["total"] = losses["total"] * float("nan")
+            return losses
+
+        with patch("sciml.train.inverse_objective", diverging):
+            with self.assertRaises(FloatingPointError):
+                train(config, self.data, self.root / "runs")
+        run = self.root / "runs" / config.name
+        status = json.loads((run / "status.json").read_text())
+        self.assertEqual(status["state"], "failed")
+        self.assertIn("Nonfinite loss at Adam step 4", status["reason"])
+        saved = load_checkpoint(run / "checkpoint.pt")
+        self.assertEqual(saved["progress"]["adam_steps"], 2)
+        self.assertEqual(status["checkpoint_adam_steps"], 2)
+        for value in saved["model"].values():
+            self.assertTrue(torch.isfinite(value).all())
+        self.assertFalse((run / "metrics.json").exists())
+        # The kept checkpoint is still a valid starting point.
+        train(config, self.data, self.root / "runs", resume=True)
+        self.assertEqual(json.loads((run / "status.json").read_text())["state"], "completed")
+
+    def test_nonfinite_weights_are_never_checkpointed(self):
+        config = replace(self.config, name="bad_weights", mode="inverse", adam_steps=2)
+        original_step = torch.optim.Adam.step
+
+        def corrupt(optimizer, *args, **kwargs):
+            result = original_step(optimizer, *args, **kwargs)
+            with torch.no_grad():
+                optimizer.param_groups[0]["params"][0].fill_(float("inf"))
+            return result
+
+        with patch.object(torch.optim.Adam, "step", corrupt):
+            with self.assertRaises(FloatingPointError):
+                train(config, self.data, self.root / "runs")
+        run = self.root / "runs" / config.name
+        self.assertEqual(load_checkpoint(run / "checkpoint.pt")["progress"]["adam_steps"], 0)
+        self.assertEqual(json.loads((run / "status.json").read_text())["state"], "failed")
+
+    def test_history_plot_is_written_for_both_modes(self):
+        from sciml.plotting import plot_run
+        for mode in ("known", "inverse"):
+            with self.subTest(mode=mode):
+                run = train(replace(self.config, name="plot_" + mode, mode=mode),
+                            self.data, self.root / "runs")
+                figure = plot_run(run, self.root / "figures")
+                self.assertEqual(figure.name, f"plot_{mode}_history.png")
+                self.assertGreater(figure.stat().st_size, 1000)
+
     def test_pressure_truth_does_not_change_training(self):
         config = replace(self.config, adam_steps=2, lbfgs_steps=0)
         first = train(config, self.data, self.root / "runs")

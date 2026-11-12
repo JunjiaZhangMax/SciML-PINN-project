@@ -112,6 +112,30 @@ class DataPreparationTests(unittest.TestCase):
                     losses["total"].backward()
                     self.assertIsNotNone(model.net[0].weight.grad)
 
+    def test_download_verifies_hash_and_never_overwrites(self):
+        import hashlib
+        import json
+        from sciml.data import download
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.mat"
+            savemat(source, {"X_star": self.data.xy, "t": self.data.times[:, None],
+                             "U_star": self.data.velocity, "p_star": self.data.pressure})
+            digest = hashlib.sha256(source.read_bytes()).hexdigest()
+            target = root / "raw" / "wake.mat"
+            with self.assertRaisesRegex(ValueError, "SHA256 mismatch"):
+                download(target, source.as_uri(), expected_sha256="0" * 64)
+            self.assertEqual(list(target.parent.iterdir()), [])
+            self.assertEqual(download(target, source.as_uri(), expected_sha256=digest), target)
+            self.assertEqual(target.read_bytes(), source.read_bytes())
+            record = json.loads(target.with_suffix(".source.json").read_text())
+            self.assertEqual((record["sha256"], record["url"]), (digest, source.as_uri()))
+            # A second call only re-verifies; an unreachable URL proves nothing is fetched.
+            download(target, "file:///does/not/exist.mat", expected_sha256=digest)
+            with self.assertRaisesRegex(ValueError, "SHA256 mismatch"):
+                download(target, source.as_uri(), expected_sha256="0" * 64)
+            self.assertEqual(target.read_bytes(), source.read_bytes())
+
     def test_invalid_window_or_oversampling_is_rejected(self):
         for updates in ({"time_end": 0.0}, {"time_end": 1.0}, {"test_per_time": 6},
                         {"n_collocation": 99999}, {"noise": .05}):

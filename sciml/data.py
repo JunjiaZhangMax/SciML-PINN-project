@@ -10,6 +10,8 @@ from .config import Config
 
 DATA_URL = "https://raw.githubusercontent.com/maziarraissi/PINNs/master/main/Data/cylinder_nektar_wake.mat"
 DEFAULT_DATA = Path("data/raw/cylinder_nektar_wake.mat")
+# Hash of the copy used for the committed animations (output/*.source.json).
+DATA_SHA256 = "99d9e1f9da7d2dff113ff2723373237b455e2de6c6747ac681846fe86fbba3d0"
 
 
 @dataclass
@@ -65,9 +67,48 @@ class ForwardData:
     upper: np.ndarray
 
 
-def download(path: Path = DEFAULT_DATA) -> Path:
-    """TODO: fetch/validate raw MAT; preserve originals; record URL, SHA256, metadata."""
-    raise NotImplementedError("Implement dataset acquisition in sciml/data.py")
+def download(path: Path = DEFAULT_DATA, url: str = DATA_URL,
+             expected_sha256: str | None = DATA_SHA256) -> Path:
+    """Fetch the raw MAT once, verify it, and record its source next to it.
+
+    An existing file is never overwritten; it is only checked. Pass
+    expected_sha256=None to skip the hash comparison for a different dataset.
+    """
+    from datetime import datetime, timezone
+    import shutil
+    import urllib.request
+
+    from ._artifacts import sha256, write_json
+
+    def check(candidate: Path) -> str:
+        digest = sha256(candidate)
+        if expected_sha256 is not None and digest != expected_sha256:
+            raise ValueError(f"SHA256 mismatch for {candidate.name}: expected "
+                             f"{expected_sha256}, got {digest}")
+        load_data(candidate)  # shapes, axis order, finiteness
+        return digest
+
+    path = Path(path)
+    if path.exists():
+        check(path)
+        print(f"Dataset already present and verified: {path}", flush=True)
+        return path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # Keep the .mat suffix so scipy reads the temporary file as-is.
+    temporary = path.with_name("partial_" + path.name)
+    try:
+        with urllib.request.urlopen(url, timeout=60) as response, open(temporary, "wb") as stream:
+            shutil.copyfileobj(response, stream)
+        digest = check(temporary)
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
+    write_json(path.with_suffix(".source.json"), {
+        "url": url, "sha256": digest, "bytes": path.stat().st_size,
+        "downloaded_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    })
+    print(f"Downloaded and verified: {path}", flush=True)
+    return path
 
 
 def load_data(path: Path = DEFAULT_DATA) -> WakeData:
