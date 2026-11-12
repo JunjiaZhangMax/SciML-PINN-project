@@ -619,7 +619,7 @@ We also do not assume that error must increase strictly monotonically with noise
 - [`sciml/cli.py`](../sciml/cli.py): Command-line arguments and module entry points. Scientific-computation commands still dispatch to interfaces awaiting implementation.
 - [`scripts/testing_data_plot.py`](../scripts/testing_data_plot.py): A static snapshot from the reference dataset.
 - [`scripts/animate_reference.py`](../scripts/animate_reference.py): Synchronized animation of reference $u,v,p$.
-- [`configs/generated/manifest.json`](../configs/generated/manifest.json): The pre-generated experiment order.
+- [Config export script](../scripts/export_configs.py): Generate the experiment configs and their order when needed.
 
 ### Core Modules to Implement in This Order
 
@@ -629,7 +629,7 @@ We also do not assume that error must increase strictly monotonically with noise
 4. [`losses.py`](../sciml/losses.py): Combine data errors and physics residuals into a differentiable loss.
 5. [`train.py`](../sciml/train.py): Optimization, logging, checkpoints, resuming, and failure records.
 6. [`evaluate.py`](../sciml/evaluate.py): Fixed-test-set metrics, pressure-reference handling, and saved predictions.
-7. [`experiments.py`](../sciml/experiments.py) and [`plotting.py`](../sciml/plotting.py): Batch execution after baseline checks, statistical summaries, and figures.
+7. [`plotting.py`](../sciml/plotting.py): Draw training curves from a single run's saved log.
 
 These core modules are currently interface scaffolds. Their implementations are to be completed by the team.
 
@@ -642,7 +642,7 @@ These core modules are currently interface scaffolds. Their implementations are 
 - Reloading a checkpoint should reproduce predictions; resumed training should restore optimizer state correctly.
 - Statistical summaries must preserve failure information and exclude smoke/pilot runs.
 
-See [`tests/test_acceptance.py`](../tests/test_acceptance.py). These are currently skipped placeholder tests, so they do not establish that the model has been validated.
+See [tests](../tests) for the implemented checks. Passing them does not establish prediction accuracy.
 
 ## 14. Frequently Asked Questions and Next Steps
 
