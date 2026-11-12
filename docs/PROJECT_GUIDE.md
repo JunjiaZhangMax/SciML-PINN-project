@@ -618,7 +618,7 @@ $$
 - [`sciml/cli.py`](../sciml/cli.py)：命令行参数与模块调用入口。科研计算子命令目前仍指向待实现接口。
 - [`scripts/testing_data_plot.py`](../scripts/testing_data_plot.py)：从参考文件绘制一个时刻的静态快照。
 - [`scripts/animate_reference.py`](../scripts/animate_reference.py)：绘制参考 $u,v,p$ 同步变化的动画。
-- [`configs/generated/manifest.json`](../configs/generated/manifest.json)：预先生成的实验顺序清单。
+- [配置导出脚本](../scripts/export_configs.py)：需要正式实验时生成配置和顺序清单。
 
 ### 按下面顺序实现的核心模块
 
@@ -628,7 +628,7 @@ $$
 4. [`losses.py`](../sciml/losses.py)：将数据误差与物理残差组合成可微损失。
 5. [`train.py`](../sciml/train.py)：优化、日志、checkpoint、恢复和失败记录。
 6. [`evaluate.py`](../sciml/evaluate.py)：固定测试集指标、压力参考处理与预测保存。
-7. [`experiments.py`](../sciml/experiments.py)、[`plotting.py`](../sciml/plotting.py)：基线核验后的批量运行、统计与绘图。
+7. [`plotting.py`](../sciml/plotting.py)：根据已有日志画单次训练曲线。
 
 这些核心模块当前是接口骨架，具体实现由小组完成。
 
@@ -641,7 +641,7 @@ $$
 - 重新载入 checkpoint 应复现预测，恢复训练应正确恢复优化器状态。
 - 统计程序必须保留失败信息，排除 smoke/pilot 结果。
 
-验收项目见 [`tests/test_acceptance.py`](../tests/test_acceptance.py)。当前均是跳过的占位测试，尚不能据此宣称模型已验证。
+已有自动检查见 [tests](../tests)。训练流程通过测试并不代表模型预测准确。
 
 ## 14. 常见问题与下一步
 

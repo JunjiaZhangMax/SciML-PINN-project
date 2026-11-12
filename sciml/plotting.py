@@ -55,12 +55,3 @@ def plot_run(run_dir: Path, output_dir: Path) -> Path:
     fig.savefig(path, dpi=130, facecolor="white")
     plt.close(fig)
     return path
-
-
-def plot_summary(runs_dir: Path, output_dir: Path) -> None:
-    """TODO: noise/sparsity means +/- sample SD with individual seed points.
-
-    Exclude smoke/pilot runs; do not pool protocols/budgets. Explicitly report
-    incomplete/failed runs, actual n, and the definition of uncertainty.
-    """
-    raise NotImplementedError("Implement sensitivity/statistics figures")

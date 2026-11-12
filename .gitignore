@@ -7,3 +7,4 @@ data/processed/
 runs/*
 !runs/.gitkeep
 .pytest_cache/
+configs/generated/
