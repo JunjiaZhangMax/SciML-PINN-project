@@ -124,6 +124,8 @@ def evaluate(run_dir: Path, data_path: Path = DEFAULT_DATA) -> dict:
         "training_seconds": checkpoint["progress"].get("training_seconds"),
         "adam_steps": checkpoint["progress"]["adam_steps"],
         "lbfgs_steps": checkpoint["progress"]["lbfgs_steps"],
+        # Steps and seconds above count this run only; a warm start is listed here.
+        "init": checkpoint.get("init"),
         "snapshot_time_indices": frames.tolist(),
         "snapshot_scope": "full-spatial illustrations, not held-out metrics",
         "evaluation_seconds": time.perf_counter() - started,

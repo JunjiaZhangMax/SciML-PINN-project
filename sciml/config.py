@@ -37,9 +37,15 @@ class Config:
     w_gauge: float = 1.0
     adam_steps: int = 50000
     adam_lr: float = 0.001
-    # Legacy settings retained so existing JSON configs still load; unused by train().
+    # Optional geometric decay from adam_lr (step 1) to this value (last Adam step).
+    adam_lr_final: float | None = None
+    # L-BFGS runs after Adam only when use_lbfgs is true; many older configs carry
+    # lbfgs_steps > 0 from before the stage was removed and must keep meaning Adam only.
+    use_lbfgs: bool = False
     lbfgs_steps: int = 0
     lbfgs_history: int = 50
+    # Name of a finished run in the same runs directory whose weights start this run.
+    init_from: str | None = None
     physics_batch_size: int = 1000
     eval_batch_size: int = 4096
     log_every: int = 100
@@ -74,6 +80,18 @@ class Config:
             raise ValueError("At least one Adam step is required")
         if not math.isfinite(self.adam_lr) or self.adam_lr <= 0:
             raise ValueError("adam_lr must be positive and finite")
+        if self.adam_lr_final is not None and not (
+                math.isfinite(self.adam_lr_final) and 0 < self.adam_lr_final <= self.adam_lr):
+            raise ValueError("adam_lr_final must be in (0, adam_lr] or None")
+        if type(self.use_lbfgs) is not bool:
+            raise ValueError("use_lbfgs must be true or false")
+        if self.use_lbfgs and self.lbfgs_steps == 0:
+            raise ValueError("use_lbfgs requires lbfgs_steps > 0")
+        if self.init_from is not None:
+            if not self._safe_name(self.init_from):
+                raise ValueError("init_from must be a run name, not a path")
+            if self.init_from == self.name:
+                raise ValueError("init_from must name a different run")
         if not all(math.isfinite(v) for v in (self.lambda1_init, self.lambda2_init)):
             raise ValueError("Initial coefficients must be finite")
         for key in ("w_observation", "w_initial", "w_boundary", "w_residual", "w_gauge"):
@@ -82,11 +100,16 @@ class Config:
                 raise ValueError(f"{key} must be finite and nonnegative")
         if self.purpose not in {"production", "smoke", "pilot"}:
             raise ValueError("purpose must be production, smoke, or pilot")
-        if not self.name or Path(self.name).name != self.name or any(c in self.name for c in '\\/:*?"<>|'):
+        if not self._safe_name(self.name):
             raise ValueError("name must be a safe directory name")
         if self.device not in {"auto", "cpu", "cuda"}:
             raise ValueError("device must be auto, cpu, or cuda")
         return self
+
+    @staticmethod
+    def _safe_name(name):
+        return (isinstance(name, str) and bool(name) and Path(name).name == name
+                and not any(c in name for c in '\\/:*?"<>|'))
 
     def to_dict(self):
         return asdict(self)
@@ -103,7 +126,13 @@ class Config:
 
     @property
     def fingerprint(self):
-        return hashlib.sha256(json.dumps(self.to_dict(), sort_keys=True).encode()).hexdigest()
+        value = self.to_dict()
+        # Options added later are hashed only when used, so checkpoints written
+        # before they existed still match their unchanged configs.
+        for key, unused in (("adam_lr_final", None), ("use_lbfgs", False), ("init_from", None)):
+            if value[key] == unused:
+                del value[key]
+        return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
 
     @classmethod
     def from_dict(cls, value):
