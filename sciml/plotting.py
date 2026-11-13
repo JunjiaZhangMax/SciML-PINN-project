@@ -36,9 +36,15 @@ def plot_run(run_dir: Path, output_dir: Path) -> Path:
         # Terms that are not part of this objective are logged as exact zeros.
         if any(value > 0 for value in values):
             loss_axis.plot(steps, values, label=name, linewidth=2 if name == "total" else 1)
-    loss_axis.set(yscale="log", xlabel="Adam step", ylabel="loss",
+    loss_axis.set(yscale="log", xlabel="step", ylabel="loss",
                   title="Training losses (terms unweighted, total weighted)")
     loss_axis.legend()
+    # L-BFGS iterations are logged after the Adam steps on the same axis.
+    has_lbfgs = any(row["stage"] == "lbfgs" for row in rows)
+    target = config.adam_steps + (config.lbfgs_steps if config.use_lbfgs else 0)
+    if has_lbfgs:
+        for axis in axes[0]:
+            axis.axvline(config.adam_steps, color="gray", linestyle=":", linewidth=1)
     if inverse:
         for axis, (name, reference) in zip(axes[0, 1:], REFERENCE_COEFFICIENTS.items()):
             values = [float(row[name]) for row in rows]
@@ -46,10 +52,15 @@ def plot_run(run_dir: Path, output_dir: Path) -> Path:
             axis.axhline(reference, color="black", linestyle="--", linewidth=1,
                          label=f"reference {reference:g}")
             error = abs(values[-1] - reference) / reference
-            axis.set(xlabel="Adam step", ylabel=name,
+            axis.set(xlabel="step", ylabel=name,
                      title=f"{name}: final {values[-1]:.5g} ({100 * error:.2f}% error)")
             axis.legend()
-    fig.suptitle(f"{config.name} | {config.purpose} | step {steps[-1]} of {config.adam_steps}")
+    title = f"{config.name} | {config.purpose} | step {steps[-1]} of {target}"
+    if has_lbfgs:
+        title += f" (L-BFGS after the dotted line at {config.adam_steps})"
+    if config.init_from:
+        title += f" | starts from {config.init_from}"
+    fig.suptitle(title)
     output_dir.mkdir(parents=True, exist_ok=True)
     path = output_dir / f"{config.name}_history.png"
     fig.savefig(path, dpi=130, facecolor="white")
