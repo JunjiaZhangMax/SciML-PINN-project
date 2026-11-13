@@ -673,7 +673,7 @@ $$
 
 最终应形成一条可复查的证据链：**明确定义的问题 → 可解释的算法与伪代码 → 多次重复的实验 → 参数/场误差与失败分析 → 可复现代码和记录**，并整理为报告、slides 和约 10 分钟的全员展示。
 
-后续执行参考 [实施清单](ROADMAP.md)，实现细节参考 [接口与实验约定](DESIGN.md)。
+后续执行参考 [实施清单](planning/ROADMAP.md)，实现细节参考 [接口与实验约定](planning/DESIGN.md)。
 
 ## 15. 参考资料
 
@@ -683,4 +683,4 @@ $$
 2. **作者方法说明**：流函数表示、连续时间反问题与速度/压力示例，见 [Physics Informed Deep Learning](https://maziarraissi.github.io/PINNs/)。
 3. **作者参考代码**：见 [NavierStokes.py](https://github.com/maziarraissi/PINNs/blob/master/main/continuous_time_identification%20%28Navier-Stokes%29/NavierStokes.py)。本组的 PyTorch、float64、训练预算、独立测试和额外配点属于需要明示的实现或实验调整。
 4. **参考数据**：见 [cylinder_nektar_wake.mat](https://github.com/maziarraissi/PINNs/blob/master/main/Data/cylinder_nektar_wake.mat)。数组形状与范围已在本地核验；下载来源和哈希记录于数据目录中的来源清单。
-5. **本组约定**：见 [DESIGN.md](DESIGN.md) 和 [实验配置](../configs/README.md)，它们描述计划中的实验，不代表已经取得的结果。
+5. **本组约定**：见 [DESIGN.md](planning/DESIGN.md) 和 [实验配置](../configs/README.md)，它们描述计划中的实验，不代表已经取得的结果。

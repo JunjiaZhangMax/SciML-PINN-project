@@ -674,7 +674,7 @@ Dataset checks, reference snapshots, the animation, configurations, and the repo
 
 The project should establish a verifiable chain of evidence: **a clearly defined problem → an explained algorithm and pseudocode → repeated experiments → parameter/field errors and failure analysis → reproducible code and records**. These should be organized into a report, slides, and an approximately 10-minute presentation involving all team members.
 
-See the [implementation checklist](ROADMAP.md) for the work plan and the [interface and experiment conventions](DESIGN.md) for implementation details. Those supporting documents are currently in Chinese.
+See the [implementation checklist](planning/ROADMAP.md) for the work plan and the [interface and experiment conventions](planning/DESIGN.md) for implementation details. Those supporting documents are currently in Chinese.
 
 ## 15. Sources and Further Reading
 
@@ -684,4 +684,4 @@ The intuitive explanations and algebraic derivations in this guide support under
 2. **Authors' method overview:** Stream-function representation, continuous-time inverse problems, and velocity/pressure examples: [Physics Informed Deep Learning](https://maziarraissi.github.io/PINNs/).
 3. **Authors' reference implementation:** [NavierStokes.py](https://github.com/maziarraissi/PINNs/blob/master/main/continuous_time_identification%20%28Navier-Stokes%29/NavierStokes.py). Our use of PyTorch, float64, a different training budget, independent testing, and additional collocation points introduces implementation or experimental changes that must be stated explicitly.
 4. **Reference dataset:** [cylinder_nektar_wake.mat](https://github.com/maziarraissi/PINNs/blob/master/main/Data/cylinder_nektar_wake.mat). Array shapes and coordinate ranges have been checked locally; the data directory contains a source manifest recording the download source and hash.
-5. **Team conventions:** [DESIGN.md](DESIGN.md) and [experiment configurations](../configs/README.md). These describe planned experiments, not results already obtained.
+5. **Team conventions:** [DESIGN.md](planning/DESIGN.md) and [experiment configurations](../configs/README.md). These describe planned experiments, not results already obtained.

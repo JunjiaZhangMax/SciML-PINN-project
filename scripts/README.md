@@ -1,4 +1,12 @@
-# 参考流场动画
+# 实验与可视化脚本
+
+从仓库根目录运行。核心训练使用 `python -m sciml train`，以下脚本处理实验组合和展示。
+
+- [run_inverse.py](run_inverse.py) 按观测数、噪声和种子组合运行反问题，具体例子见[配置说明](../configs/README.md)。
+- [export_configs.py](export_configs.py) 导出课程计划中的 25 组配置。
+- [testing_data_plot.py](testing_data_plot.py) 查看指定时刻的参考速度和压力快照。
+- [diagnose_forward.py](diagnose_forward.py) 分析已有正问题结果中的入口误差和尾流衰减。
+- [animate_comparison.py](animate_comparison.py) 并排播放预测与真值，[animate_reference.py](animate_reference.py) 播放参考场。
 
 ## 训练结果与真值并排动画
 

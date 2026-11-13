@@ -4,6 +4,13 @@
 
 **第一次看项目？** 先读[中文原理说明](docs/PROJECT_GUIDE.md)或[英文版](docs/PROJECT_GUIDE.en.md)。想看效果，下载后用浏览器打开[预测与真值动画](output/forward_comparison.html)。
 
+## 按任务找入口
+
+- **运行单个实验**：在 [configs/](configs/README.md) 选配置，按[训练说明](docs/TRAINING.md)启动、恢复或评估。
+- **比较反问题配置**：用 [run_inverse.py](scripts/run_inverse.py) 指定观测数、噪声和种子，预览组合后加 `--run` 执行。各组结果和汇总表保存在指定的 `runs/` 子目录。
+- **查看数据与结果**：[data/](data/README.md) 存参考数据，`runs/` 存本地训练日志、模型与指标，[output/](output/) 存展示文件。[脚本索引](scripts/README.md) 说明如何生成快照和动画。
+- **准备课程提交**：使用[报告提纲](docs/deliverables/report_outline.md)和[展示提纲](docs/deliverables/presentation_outline.md)。[原始实验约定](docs/planning/DESIGN.md)与[实施清单](docs/planning/ROADMAP.md)用于回顾小组计划。
+
 ## 跑通一次
 
 在仓库根目录、已安装适合本机的 PyTorch 的 Python 环境中执行：
