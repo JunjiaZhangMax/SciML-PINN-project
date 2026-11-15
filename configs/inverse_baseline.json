@@ -1,5 +1,5 @@
 {
-  "name": "pilot_inverse_n5000_noise0_seed0",
+  "name": "inverse_baseline",
   "group": "reference",
   "mode": "inverse",
   "n_observations": 5000,

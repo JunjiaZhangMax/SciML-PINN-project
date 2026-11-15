@@ -1,6 +1,6 @@
 """Animate a saved PINN and reference side by side, without retraining.
 
-Example: python scripts/animate_comparison.py --run runs/forward_full_adam_20261109
+Example: python scripts/animate_comparison.py --run runs/forward_baseline
 """
 
 import argparse

@@ -1,4 +1,4 @@
-﻿# SciML：圆柱尾流 PINN
+# SciML：圆柱尾流 PINN
 
 给定圆柱下游的一部分速度观测，我们希望恢复速度、压力，并识别 Navier–Stokes 方程的对流与黏性系数。正问题固定系数，用初始和边界速度检验实现；反问题从散布的速度观测学习系数。
 
@@ -6,6 +6,7 @@
 
 ## 按任务找入口
 
+- **安排和勾选实验**：打开[实验清单](docs/planning/EXPERIMENTS.md)，每次训练单独记录配置、完成状态和结果位置。
 - **运行单个实验**：在 [configs/](configs/README.md) 选配置，按[训练说明](docs/TRAINING.md)启动、恢复或评估。
 - **比较反问题配置**：用 [run_inverse.py](scripts/run_inverse.py) 指定观测数、噪声和种子，预览组合后加 `--run` 执行。各组结果和汇总表保存在指定的 `runs/` 子目录。
 - **查看数据与结果**：[data/](data/README.md) 存参考数据，`runs/` 存本地训练日志、模型与指标，[output/](output/) 存展示文件。[脚本索引](scripts/README.md) 说明如何生成快照和动画。
@@ -18,11 +19,11 @@
 ```powershell
 python -m pip install -e .
 python -m sciml download
-python -m sciml train --config configs/smoke_inverse.json
-python -m sciml plot --run runs/smoke_inverse
+python -m sciml train --config configs/inverse_baseline.json
+python -m sciml plot --run runs/inverse_baseline
 ```
 
-短训练用于验证流程。训练结束会自动评估，指标在 `runs/<name>/metrics.json`。如需重新评估，运行 `python -m sciml evaluate --run runs/<name>`。恢复中断的训练时，用原配置运行 train 并加上 `--resume`。
+这份反问题配置会训练 50,000 步 Adam。训练结束会自动评估，指标在 `runs/<name>/metrics.json`。如需重新评估，运行 `python -m sciml evaluate --run runs/<name>`。恢复中断的训练时，用原配置运行 train 并加上 `--resume`。
 
 ## 从哪里读代码
 

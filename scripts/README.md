@@ -11,7 +11,7 @@
 ## 训练结果与真值并排动画
 
 ```powershell
-python scripts/animate_comparison.py --run runs/forward_full_adam_20261109
+python scripts/animate_comparison.py --run runs/forward_baseline
 ```
 
 生成 `output/forward_comparison.html`，左侧为最终 PINN 预测、右侧为参考值，三行分别为 u、v、p。

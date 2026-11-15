@@ -1,6 +1,6 @@
 {
-  "run": "C:\\Users\\Retina\\Documents\\ChatGPT\\SciML project\\runs\\forward_full_adam_20261109",
-  "checkpoint_sha256": "d31cd7d792eecdbaaf6849cdb1982d62b2031fd95e99e880feba3108d51759ea",
+  "run": "C:\\Users\\Retina\\Documents\\ChatGPT\\SciML project\\runs\\forward_baseline",
+  "checkpoint_sha256": "3e2ac67e4110552955bf54f95a65c1d495ba442196cfba224ebd8f38700f8c68",
   "dataset": "C:\\Users\\Retina\\Documents\\ChatGPT\\SciML project\\data\\raw\\cylinder_nektar_wake.mat",
   "dataset_sha256": "99d9e1f9da7d2dff113ff2723373237b455e2de6c6747ac681846fe86fbba3d0",
   "frames": [

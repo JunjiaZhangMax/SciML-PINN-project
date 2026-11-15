@@ -1,14 +1,5 @@
 # 训练代码使用说明
 
-在仓库根目录运行短训练：
-
-```powershell
-python -m sciml train --config configs/smoke_forward.json
-python -m sciml train --config configs/smoke_inverse.json
-```
-
-两份 smoke 配置仅用于检查流程，不代表已经得到准确的科学结果。正式实验请复制配置、修改 name，并设置训练预算、采样数量和时间范围。每次运行使用新的 name，避免覆盖已有结果。
-
 ## 反问题试运行（识别 lambda1、lambda2）
 
 新机器上先准备数据；已存在的文件只校验 SHA256，不会被覆盖：
@@ -21,28 +12,17 @@ python -m sciml download
 但 purpose 为 pilot，不计入正式统计：
 
 ```powershell
-python -m sciml train --config configs/pilot_inverse_n5000_noise0_seed0.json
-python -m sciml plot --run runs/pilot_inverse_n5000_noise0_seed0
+python -m sciml train --config configs/inverse_baseline.json
+python -m sciml plot --run runs/inverse_baseline
 ```
 
 第二条命令读取 history.csv，在 output/figures/ 生成各项损失和两个系数随步数变化的曲线，
 不重新训练或评估。训练为全量 Adam；该配置在 CPU 上约 0.36 秒/步，在 RTX 5070 Ti 上实测约 0.22 秒/步（50000 步 3.1 小时）。
 
-### 第一次试运行的结果与第二次试运行
+### 历史试运行摘要（来自项目记录）
 
 第一次试运行（50000 步恒定学习率 Adam，GPU 上约 0.22 秒/步，共 3.1 小时）没有收敛：
 lambda1 误差 1.9%，lambda2 误差 26%，去均值压力误差 21%，损失结束时仍在下降。
-
-第二次试运行从第一次的模型继续，不重头训练：先做 20000 步学习率从 1e-3 衰减到 1e-4 的 Adam，
-再做最多 30000 次 L-BFGS 迭代。运行前 runs/ 下必须有第一次试运行的目录：
-
-```powershell
-python -m sciml train --config configs/pilot2_inverse_n5000_noise0_seed0.json
-python -m sciml plot --run runs/pilot2_inverse_n5000_noise0_seed0
-```
-
-这组步数是估计值，尚未在真实数据上验证。建议的达标线：lambda1 误差低于 1%、lambda2 误差低于 10%，
-且两条系数曲线走平；达标后再用同一设置跑正式实验。
 
 ## 三个可选训练设置
 
@@ -96,7 +76,7 @@ runs/name/ 保存：
 checkpoint_every 控制定期保存间隔，训练结束也会保存。中断后使用同一份配置和数据恢复：
 
 ```powershell
-python -m sciml train --config configs/forward_full_adam_20261109.json --resume
+python -m sciml train --config configs/forward_baseline.json --resume
 ```
 
 恢复从最近检查点接续，检查点之后的未保存步骤需要重算。旧运行若没有 checkpoint.pt，无法恢复。当前网络无随机层，恢复会加载模型和 Adam 状态。physics_batch_size 不再使用；lbfgs_steps 和 lbfgs_history 只在 use_lbfgs 为 true 时生效。恢复时配置不能改动，包括 adam_steps；要在已完成的运行上继续训练，用新名字加 init_from。
@@ -104,7 +84,7 @@ python -m sciml train --config configs/forward_full_adam_20261109.json --resume
 ## 单独评估
 
 ```powershell
-python -m sciml evaluate --run runs/smoke_forward
+python -m sciml evaluate --run runs/forward_baseline
 ```
 
 评估使用保存的测试索引。压力预测和参考值在每个测试时刻分别减去空间均值，再计算相对误差。误差以小数保存，转换为百分比时乘以 100。

@@ -12,7 +12,7 @@ from sciml.config import Config
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base", type=Path, default=Path("configs/pilot_inverse_n5000_noise0_seed0.json"))
+    parser.add_argument("--base", type=Path, default=Path("configs/inverse_baseline.json"))
     parser.add_argument("--observations", nargs="+", type=int, required=True)
     parser.add_argument("--noise", nargs="+", type=float, required=True)
     parser.add_argument("--seeds", nargs="+", type=int, default=[0])
