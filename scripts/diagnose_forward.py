@@ -67,8 +67,8 @@ def main():
     assert sha256(data_path) == checkpoint["data_sha256"]
     metadata = json.loads((PROJECT / "output/forward_comparison.source.json").read_text())
     assert metadata["checkpoint_sha256"] == sha256(run / "checkpoint.pt")
-    with np.load(run / "animation_fields.npz") as a:
-        xy, times, prediction, reference = a["xy"], a["times"], a["predicted"], a["reference"]
+    from animate_comparison import load_comparison
+    xy, times, _, prediction, reference = load_comparison(run, data_path, "auto")
     with np.load(run / "samples.npz") as a:
         collocation = a["collocation_coordinates"]
         test = a["test_indices"]

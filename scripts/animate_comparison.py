@@ -19,7 +19,7 @@ import torch
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
-from sciml._artifacts import load_checkpoint, save_arrays, sha256
+from sciml._artifacts import load_checkpoint, sha256
 from sciml.config import Config
 from sciml.data import coordinates_at, load_data
 from sciml.evaluate import _predict
@@ -50,8 +50,6 @@ def load_comparison(run, data_path, device_name):
     # The pressure offset is unidentifiable and may vary with time.
     predicted[:, :, 2] -= predicted[:, :, 2].mean(axis=0, keepdims=True)
     reference[:, :, 2] -= reference[:, :, 2].mean(axis=0, keepdims=True)
-    save_arrays(run / "animation_fields.npz", xy=data.xy, times=data.times[frames],
-                frame_indices=frames, predicted=predicted, reference=reference)
     return data.xy, data.times[frames], frames, predicted, reference
 
 
@@ -151,6 +149,9 @@ def main():
         "rendering": "native rectangular grid, nearest pixels; no temporal interpolation",
         "layout": "rows u/v/p; left prediction, right reference",
     }, indent=2) + "\n", encoding="utf-8")
+    from animate_inverse_pair import export_player
+    export_player(xy, times[selected], [reference[:, selected], predicted[:, selected]],
+                  args.output, ["真值", "PINN · " + args.run.name], "流场预测与真值", args.fps)
     print(f"Saved: {args.output}", flush=True)
 
 

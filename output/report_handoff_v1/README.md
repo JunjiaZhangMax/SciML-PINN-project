@@ -1,4 +1,6 @@
-﻿# 阶段结果交接 v1
+# 阶段结果交接 v1
+
+The repository keeps presentation HTML in the parent output directory. The ZIP includes these pages for offline sharing. Rebuild with scripts/refresh_presentations.py.
 
 本包给报告撰写者汇总三组已完成实验。由保存的最终 metrics.json、history.csv 和 config.json 整理。各组均为 seed 0 单次结果，适合写作阶段性实验与讨论。后续优化、重复实验及最终选型仍待完成。
 

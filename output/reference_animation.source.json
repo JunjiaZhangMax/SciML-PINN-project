@@ -436,5 +436,7 @@
     ]
   },
   "matplotlib_version": "3.10.6",
-  "numpy_version": "2.2.6"
+  "numpy_version": "2.2.6",
+  "rendering": "native rectangular grid, nearest pixels, no interpolation",
+  "color_modes": "shared reference range or full range; fixed across time"
 }

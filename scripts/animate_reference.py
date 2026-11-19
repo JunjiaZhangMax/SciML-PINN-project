@@ -151,7 +151,17 @@ def main(argv=None):
             embedded = len(re.findall(r'frames\[\d+\]\s*=', player))
             if embedded != len(metadata["frame_indices"]):
                 raise RuntimeError(f"Incomplete HTML: {embedded} / {len(metadata['frame_indices'])} frames")
-            args.output.write_text(offline_html(player, metadata), encoding="utf-8")
+            from animate_inverse_pair import export_player
+            from animate_comparison import load_data
+            data = load_data(args.data)
+            chosen = np.array(metadata["frame_indices"])
+            pressure = data.pressure[:, chosen].copy()
+            pressure -= pressure.mean(axis=0, keepdims=True)
+            values = np.stack((data.velocity[:, 0, chosen], data.velocity[:, 1, chosen], pressure), axis=-1)
+            export_player(data.xy, data.times[chosen], [values], args.output,
+                          ["数值模拟参考场"], "圆柱尾流 · 真值", args.fps)
+            metadata["spatial_rendering"] = "native rectangular grid, nearest pixels"
+
         elif suffix == ".gif":
             animation.save(args.output, writer=PillowWriter(fps=args.fps), dpi=90)
         else:

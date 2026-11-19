@@ -214,38 +214,6 @@
   ],
   "pressure": "Separate spatial mean removed per frame and model",
   "rendering": "Native grid, nearest pixels, no temporal interpolation",
-  "scales": {
-    "u": {
-      "reference": {
-        "lo": -0.24026849014902615,
-        "hi": 1.322556473239624
-      },
-      "full": {
-        "lo": -6.7512612087512505,
-        "hi": 3.9000693148152994
-      }
-    },
-    "v": {
-      "reference": {
-        "lo": -0.624110517662326,
-        "hi": 0.624110517662326
-      },
-      "full": {
-        "lo": -3.333095000510167,
-        "hi": 3.333095000510167
-      }
-    },
-    "p": {
-      "reference": {
-        "lo": -0.4519607749175231,
-        "hi": 0.4519607749175231
-      },
-      "full": {
-        "lo": -0.4541568202731747,
-        "hi": 0.4541568202731747
-      }
-    }
-  },
   "out_of_range_colors": {
     "below": "#ff00aa",
     "above": "#ffbb00"

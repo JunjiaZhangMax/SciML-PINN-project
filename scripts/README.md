@@ -19,7 +19,7 @@ python scripts/animate_comparison.py --run runs/forward_baseline
 压力逐时刻分别去全空间均值。原始规则网格直接显示，不进行时间插值。
 这是最终模型随物理时间变化的动画，不是模型训练过程动画。
 
-同时保存静态预览 `.png`、来源记录 `.source.json`，以及运行目录中的全时空数值 `animation_fields.npz`。
+HTML pages use the shared player. Large animation arrays are computed in memory; diagnostics regenerate them from checkpoints.
 无 GPU 时可加 `--device cpu`。用 `--stride 2` 可减少输出帧数。
 
 ## 仅真值动画

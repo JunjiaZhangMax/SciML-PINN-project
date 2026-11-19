@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -12,7 +12,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 #play{background:#172f49;color:white;min-width:76px;border-color:#172f49}
 input{flex:1;min-width:180px;accent-color:#007eae}output{font-variant-numeric:tabular-nums;font-weight:600;min-width:125px}
 .scale-control{display:flex;align-items:center;gap:9px;margin-top:12px}.hint{font-size:12px;margin-top:8px}
-.columns,.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.columns,.cards{display:grid;grid-template-columns:repeat(var(--columns,3),minmax(0,1fr));gap:16px}
 .columns{margin-top:14px}.columns div{border-left:3px solid #68849b;padding-left:10px;font-weight:700;font-size:15px}.columns div:first-child{border-color:#007eae}.columns small{display:block;font-weight:400;font-size:12px;color:#536477}
 section{margin-bottom:20px}.row-title{display:flex;align-items:center;gap:12px;margin:0 0 8px}.row-title h2{font-size:17px;margin:0;min-width:120px}.bar{height:9px;width:150px;border-radius:2px}.range{font-size:12px;font-variant-numeric:tabular-nums}
 .card{background:white;border:1px solid #dce3eb;border-radius:9px;padding:12px 12px 8px;box-shadow:0 2px 5px #20354c06;overflow:hidden}
@@ -42,9 +42,15 @@ footer{font-size:12px;color:#617286;border-top:1px solid #d3dce6;padding:14px 0}
 </main>
 <script>
 const data=/*PAYLOAD*/;
+document.title=data.title;
+document.querySelector('h1').textContent=data.title;
+document.querySelector('main > p').textContent='速度与压力 · 同步时间轴 · 固定共享色标';
+document.querySelector('.columns').innerHTML=data.columns.map(c=>'<div>'+c+'</div>').join('');
+document.documentElement.style.setProperty('--columns',data.columns.length);
+document.querySelector('footer').textContent='x ∈ [1,8]，y ∈ [−2,2] · 无量纲 · 压力逐时刻去空间均值 · 原始网格逐像素显示，共 '+data.times.length+' 帧，无时间插值。全空间展示含训练点；测试指标见 metrics.json。';
 const slider=document.querySelector('#slider'), time=document.querySelector('#time'), scale=document.querySelector('#scale'), play=document.querySelector('#play'), speed=document.querySelector('#speed');
 const labels=['流向速度 u','横向速度 v','去均值压力 p'];
-document.querySelector('#fields').innerHTML=data.panels.map((p,k)=>'<section><div class="row-title"><h2>'+labels[k]+'</h2><span class="range low"></span><span class="bar"></span><span class="range high"></span></div><div class="cards">'+[0,1,2].map((c)=>'<div class="card"><div class="plot"><div class="yticks"><span>2</span><span>y　0</span><span>−2</span></div><canvas width="'+data.width+'" height="'+data.height+'" aria-label="'+labels[k]+'，'+['真值','5000点模型','100点模型'][c]+'"></canvas></div><div class="xticks"><span>1</span><span>x</span><span>8</span></div><div class="stats"></div></div>').join('')+'</div></section>').join('');
+document.querySelector('#fields').innerHTML=data.panels.map((p,k)=>'<section><div class="row-title"><h2>'+labels[k]+'</h2><span class="range low"></span><span class="bar"></span><span class="range high"></span></div><div class="cards">'+data.columns.map((column,c)=>'<div class="card"><div class="plot"><div class="yticks"><span>2</span><span>y　0</span><span>−2</span></div><canvas width="'+data.width+'" height="'+data.height+'" aria-label="'+labels[k]+'，'+['真值','5000点模型','100点模型'][c]+'"></canvas></div><div class="xticks"><span>1</span><span>x</span><span>8</span></div><div class="stats"></div></div>').join('')+'</div></section>').join('');
 slider.max=data.times.length-1;let timer=null,version=0;
 const fmt=x=>Math.abs(x)<.001&&x!==0?x.toExponential(1):Number(x.toPrecision(3)).toString();
 async function show(i){
@@ -63,7 +69,7 @@ async function show(i){
   });
  }));
 }
-function start(){timer=setInterval(()=>show((Number(slider.value)+1)%data.times.length),1000/Number(speed.value));play.textContent='暂停';}
+function start(){timer=setInterval(()=>show((Number(slider.value)+1)%data.times.length),1000/(Number(speed.value)*data.fps/10));play.textContent='暂停';}
 play.onclick=()=>{if(timer){clearInterval(timer);timer=null;play.textContent='播放';}else start();};
 speed.onchange=()=>{if(timer){clearInterval(timer);start();}};
 slider.oninput=()=>show(Number(slider.value));scale.onchange=()=>show(Number(slider.value));

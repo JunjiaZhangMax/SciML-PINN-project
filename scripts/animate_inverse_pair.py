@@ -1,4 +1,4 @@
-﻿"""Export a synchronized, offline inverse-PINN comparison with shared color scales."""
+"""Export a synchronized, offline inverse-PINN comparison with shared color scales."""
 import base64
 import json
 from io import BytesIO
@@ -25,12 +25,26 @@ def render():
     xy, times, frame_ids, dense, truth = loaded[0]
     for a, b in zip(loaded[0][:3], loaded[1][:3]):
         np.testing.assert_array_equal(a, b)
+    export_player(xy, times, [truth, dense, loaded[1][3]], OUTPUT,
+                  ["真值", "5,000 点 · 无噪声", "100 点 · 5% 噪声"], "反问题尾流对照")
+    OUTPUT.with_suffix(".source.json").write_text(json.dumps(dict(
+        runs=[dict(path=str(r), checkpoint_sha256=sha256(r/"checkpoint.pt")) for r in RUNS],
+        dataset_sha256=sha256(data), frame_indices=frame_ids.tolist(),
+        pressure="Separate spatial mean removed per frame and model",
+        rendering="Native grid, nearest pixels, no temporal interpolation",
+        out_of_range_colors=dict(below="#ff00aa", above="#ffbb00"),
+    ), indent=2), encoding="utf-8")
+    print(f"Saved {OUTPUT} ({len(times)} frames)", flush=True)
+
+
+
+def export_player(xy, times, values, output, columns, title, fps=10):
     xs, ys = np.unique(xy[:, 0]), np.unique(xy[:, 1])
     order = np.lexsort((xy[:, 0], -xy[:, 1]))
     gx, gy = np.meshgrid(xs, ys[::-1])
     np.testing.assert_allclose(xy[order], np.column_stack((gx.ravel(), gy.ravel())))
     fields = [a[order].reshape(len(ys), len(xs), len(times), 3)
-              for a in (truth, dense, loaded[1][3])]
+              for a in values]
     panels = []
     for k, name in enumerate(("u", "v", "p")):
         cmap = mpl.colormaps["RdBu_r" if k else "viridis"]
@@ -58,19 +72,9 @@ def render():
                 ranges.append([[float(a.min()), float(a.max())] for a in values])
             modes[mode] = dict(lo=lo, hi=hi, images=images, outside=outside, ranges=ranges)
         panels.append(dict(name=name, palette=palette, modes=modes))
-    payload = dict(times=times.tolist(), width=len(xs), height=len(ys), panels=panels)
+    payload = dict(times=times.tolist(), width=len(xs), height=len(ys), panels=panels, columns=columns, title=title, fps=fps)
     template = (PROJECT / "scripts/inverse_comparison_player.html").read_text(encoding="utf-8")
-    OUTPUT.write_text(template.replace("/*PAYLOAD*/", json.dumps(payload)), encoding="utf-8")
-    OUTPUT.with_suffix(".source.json").write_text(json.dumps(dict(
-        runs=[dict(path=str(r), checkpoint_sha256=sha256(r/"checkpoint.pt")) for r in RUNS],
-        dataset_sha256=sha256(data), frame_indices=frame_ids.tolist(),
-        pressure="Separate spatial mean removed per frame and model",
-        rendering="Native grid, nearest pixels, no temporal interpolation",
-        scales={p["name"]: {m: {k: v for k, v in s.items() if k in ("lo", "hi")}
-                               for m, s in p["modes"].items()} for p in panels},
-        out_of_range_colors=dict(below="#ff00aa", above="#ffbb00"),
-    ), indent=2), encoding="utf-8")
-    print(f"Saved {OUTPUT} ({len(times)} frames)", flush=True)
+    output.write_text(template.replace("/*PAYLOAD*/", json.dumps(payload)), encoding="utf-8")
 
 
 if __name__ == "__main__":

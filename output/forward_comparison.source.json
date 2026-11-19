@@ -423,6 +423,7 @@
     ]
   ],
   "pressure_transform": "separate spatial mean removal at every time",
-  "rendering": "native rectangular grid, nearest pixels; no temporal interpolation",
-  "layout": "rows u/v/p; left prediction, right reference"
+  "rendering": "native rectangular grid, nearest pixels, no interpolation",
+  "layout": "rows u/v/p; left prediction, right reference",
+  "color_modes": "shared reference range or full range; fixed across time"
 }
