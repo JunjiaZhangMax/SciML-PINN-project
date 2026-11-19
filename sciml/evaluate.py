@@ -86,6 +86,7 @@ def evaluate(run_dir: Path, data_path: Path = DEFAULT_DATA) -> dict:
     if sha256(run_dir / "samples.npz") != checkpoint["samples_sha256"]:
         raise ValueError("Saved samples have changed or are corrupted")
     with np.load(run_dir / "samples.npz", allow_pickle=False) as saved:
+        sample_times = saved["time_indices"].copy() if "time_indices" in saved else None
         test_indices = saved["test_indices"].copy()
         lower, upper = saved["lower"].copy(), saved["upper"].copy()
     data = load_data(data_path)
@@ -99,6 +100,8 @@ def evaluate(run_dir: Path, data_path: Path = DEFAULT_DATA) -> dict:
     predicted_uv, predicted_p = _predict(model, test_coordinates, config.eval_batch_size, device)
 
     selected = np.flatnonzero((data.times >= lower[2] - 1e-10) & (data.times <= upper[2] + 1e-10))
+    if sample_times is not None:
+        selected = sample_times
     frames = np.unique(selected[[0, len(selected) // 2, -1]])
     snapshot_indices = (np.arange(len(data.xy))[:, None] * nt + frames[None, :]).ravel()
     snapshot_coordinates = coordinates_at(data, snapshot_indices)

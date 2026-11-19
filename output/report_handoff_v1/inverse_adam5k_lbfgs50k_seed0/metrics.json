@@ -1,0 +1,29 @@
+{
+  "purpose": "pilot",
+  "mode": "inverse",
+  "task": "inverse",
+  "lambda1": 0.9998595234986491,
+  "lambda2": 0.010065414139412112,
+  "relative_error_lambda1": 0.00014047650135085021,
+  "relative_error_lambda2": 0.006541413941211181,
+  "relative_l2_u": 0.002616012603191375,
+  "relative_l2_v": 0.01060762373114005,
+  "relative_l2_pressure_centered": 0.018784361751429723,
+  "test_count": 100000,
+  "test_time_count": 200,
+  "pressure_reference": "prediction and reference spatially centered separately at each test time",
+  "relative_error_units": "fractions, not percentages",
+  "nonphysical_viscosity": false,
+  "training_seconds": 44581.88413649998,
+  "adam_steps": 5000,
+  "lbfgs_steps": 45000,
+  "init": null,
+  "snapshot_time_indices": [
+    0,
+    100,
+    199
+  ],
+  "snapshot_scope": "full-spatial illustrations, not held-out metrics",
+  "evaluation_seconds": 0.12630470000021887,
+  "undefined_metrics": []
+}

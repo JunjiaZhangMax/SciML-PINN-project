@@ -182,7 +182,7 @@ def _bounds(data: WakeData, times: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
             np.r_[data.xy.max(axis=0), data.times[times[-1]]])
 
 
-def prepare_forward_data(data: WakeData, config: Config) -> ForwardData:
+def prepare_forward_data(data: WakeData, config: Config, *, window_start=None, initial_predictor=None) -> ForwardData:
     """Initial velocities + four-edge velocities; interior labels are held out.
 
     All spatial points at the first time provide IC labels. Each distinct edge
@@ -196,6 +196,12 @@ def prepare_forward_data(data: WakeData, config: Config) -> ForwardData:
     if config.noise != 0:
         raise ValueError("Forward initial/boundary data are noise-free; use noise=0")
     times = _selected_times(data, config)
+    if window_start is not None:
+        times = times[data.times[times] >= window_start - 1e-10]
+        if len(times) < 2 or not np.isclose(data.times[times[0]], window_start):
+            raise ValueError("Window must start on a reference frame")
+        if times[0] != 0 and initial_predictor is None:
+            raise ValueError("Later windows require a teacher velocity")
     lower, upper = _bounds(data, times)
     boundary_mask = np.any(
         np.isclose(data.xy, lower[:2], rtol=0, atol=1e-10)
@@ -208,7 +214,13 @@ def prepare_forward_data(data: WakeData, config: Config) -> ForwardData:
     boundary_indices = (boundary_space[:, None] * nt + times[None, 1:]).ravel()
     if len(boundary_indices) == 0 or len(interior_space) == 0:
         raise ValueError("The rectangular window needs both boundary and interior samples")
-    pool, test_indices = _split_pool(data, interior_space, times[1:], config)
+    if window_start is None:
+        pool, test_indices = _split_pool(data, interior_space, times[1:], config)
+    else:
+        pool, test_indices = _split_pool(data, interior_space, np.arange(1, nt), config)
+        pool = pool[np.isin(pool % nt, times[1:])]
+        test_indices = test_indices[np.isin(test_indices % nt, times[1:])]
+        lower, upper = _bounds(data, np.arange(nt))
     if config.n_collocation > len(pool):
         raise ValueError("n_collocation exceeds the interior non-test pool in this time window")
     collocation_indices = np.random.default_rng(config.collocation_seed).choice(
@@ -220,7 +232,8 @@ def prepare_forward_data(data: WakeData, config: Config) -> ForwardData:
     ))
     return ForwardData(
         initial_coordinates=coordinates_at(data, initial_indices),
-        initial_velocity=velocities_at(data, initial_indices),
+        initial_velocity=(velocities_at(data, initial_indices) if initial_predictor is None
+                          else initial_predictor(coordinates_at(data, initial_indices))),
         boundary_coordinates=coordinates_at(data, boundary_indices),
         boundary_velocity=velocities_at(data, boundary_indices),
         collocation_coordinates=coordinates_at(data, collocation_indices),

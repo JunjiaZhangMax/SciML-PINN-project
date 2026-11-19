@@ -7,6 +7,8 @@
 - [x] 正问题 · `forward_baseline` · 已知系数 1、0.01，全时间窗，5,000 个内部 PDE 点，Adam 50,000 步。测试集横向速度相对误差 53.9%。本地结果：`runs/forward_baseline/metrics.json`。
 - [ ] 反问题试运行 · `inverse_baseline` · N=5,000，噪声 0%，seed 0，在观测点计算 PDE 残差。已有历史摘要，待取得完整结果或在本机复现。[配置](../../configs/inverse_baseline.json) 的 purpose 为 pilot，单独记录。
 
+- [ ] 短 Adam 预热试运行 · [inverse_adam5k_lbfgs50k_seed0](../../configs/inverse_adam5k_lbfgs50k_seed0.json) · N=5,000，噪声 0%，seed 0。5,000 步 Adam 后切换到 L-BFGS（最多 50,000 次），比较切换时与最终的系数、速度、压力误差和耗时。
+
 ## 正式反问题实验
 
 N 表示时空速度观测总数。下列运行名与 `python scripts/export_configs.py` 导出的配置对应。计划使用完整时间窗、8×20 tanh、float64、Adam 50,000 步、学习率 0.001。正式运行前统一确认预算。每组查看两个系数及其相对误差、测试集速度和去均值压力误差。

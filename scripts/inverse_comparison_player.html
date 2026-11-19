@@ -1,0 +1,74 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>尾流对照 · Inverse PINN</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f0f3f7;color:#17273a;font:14px/1.5 "Segoe UI","Microsoft YaHei",sans-serif}
+main{max-width:1500px;margin:auto;padding:26px 32px}h1{font-size:27px;letter-spacing:-.6px;margin:0 0 4px}p{margin:0;color:#536477}
+.toolbar{position:sticky;top:0;z-index:5;background:#f0f3f7f5;backdrop-filter:blur(10px);padding:15px 0 12px}
+.controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}button,select{font:inherit;border:1px solid #c8d2df;border-radius:7px;padding:7px 12px;background:white;color:#17273a;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #007eae;outline-offset:2px}
+#play{background:#172f49;color:white;min-width:76px;border-color:#172f49}
+input{flex:1;min-width:180px;accent-color:#007eae}output{font-variant-numeric:tabular-nums;font-weight:600;min-width:125px}
+.scale-control{display:flex;align-items:center;gap:9px;margin-top:12px}.hint{font-size:12px;margin-top:8px}
+.columns,.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.columns{margin-top:14px}.columns div{border-left:3px solid #68849b;padding-left:10px;font-weight:700;font-size:15px}.columns div:first-child{border-color:#007eae}.columns small{display:block;font-weight:400;font-size:12px;color:#536477}
+section{margin-bottom:20px}.row-title{display:flex;align-items:center;gap:12px;margin:0 0 8px}.row-title h2{font-size:17px;margin:0;min-width:120px}.bar{height:9px;width:150px;border-radius:2px}.range{font-size:12px;font-variant-numeric:tabular-nums}
+.card{background:white;border:1px solid #dce3eb;border-radius:9px;padding:12px 12px 8px;box-shadow:0 2px 5px #20354c06;overflow:hidden}
+.plot{position:relative;padding-left:21px}.plot canvas{display:block;width:100%;height:auto;aspect-ratio:7/4;image-rendering:pixelated;border:1px solid #d1dae5}
+.yticks{position:absolute;left:0;top:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between;font-size:10px;color:#65788b}.xticks{display:flex;justify-content:space-between;margin-left:21px;font-size:10px;color:#65788b}
+.stats{font-size:11px;color:#5a6f82;margin-top:5px;font-variant-numeric:tabular-nums;min-height:17px}.warning{color:#954a00;font-weight:600}
+.legend{display:flex;gap:15px;font-size:12px;align-items:center}.swatch{display:inline-block;width:10px;height:10px;margin-right:5px}
+footer{font-size:12px;color:#617286;border-top:1px solid #d3dce6;padding:14px 0}
+@media(max-width:800px){main{padding:16px 12px}.cards,.columns{gap:6px}.card{padding:6px 4px}.columns div{font-size:12px}.stats{font-size:10px}.row-title h2{min-width:90px}.hint{line-height:1.7}}
+</style>
+<main>
+<h1>尾流对照</h1>
+<p>真值与两个反问题模型 · 同步查看速度与压力</p>
+<div class="toolbar">
+<div class="controls">
+<button id="play">播放</button><button id="prev" aria-label="上一帧">←</button><button id="next" aria-label="下一帧">→</button>
+<input id="slider" aria-label="物理时间" type="range" min="0" value="0"><output id="time"></output>
+<label>速度 <select id="speed"><option value="5">0.5×</option><option value="10" selected>1×</option><option value="20">2×</option></select></label>
+</div>
+<div class="scale-control"><label for="scale">色标范围</label><select id="scale"><option value="reference">真值范围 · 增强尾流对比</option><option value="full">全部模型范围 · 查看完整幅值</option></select>
+<div class="legend"><span><i class="swatch" style="background:#ff00aa"></i>低于下限</span><span><i class="swatch" style="background:#ffbb00"></i>高于上限</span></div></div>
+<p class="hint">每个物理量的三列、全部时刻共用固定线性色标。默认范围取全部时刻的真值；超范围区域用特殊颜色标记，卡片下显示其占比。</p>
+<div class="columns"><div>真值<small>数值模拟参考场</small></div><div>5,000 点模型<small>无噪声速度观测</small></div><div>100 点模型<small>5% 噪声速度观测</small></div></div>
+</div>
+<div id="fields"></div>
+<footer>窗口 x ∈ [1, 8]，y ∈ [−2, 2] · 坐标与物理量均为无量纲。压力逐时刻分别去除空间均值。原始网格逐像素显示，共 200 帧，时间与空间均未插值。此页展示完整窗口，独立测试指标见各实验的 metrics.json。</footer>
+</main>
+<script>
+const data=/*PAYLOAD*/;
+const slider=document.querySelector('#slider'), time=document.querySelector('#time'), scale=document.querySelector('#scale'), play=document.querySelector('#play'), speed=document.querySelector('#speed');
+const labels=['流向速度 u','横向速度 v','去均值压力 p'];
+document.querySelector('#fields').innerHTML=data.panels.map((p,k)=>'<section><div class="row-title"><h2>'+labels[k]+'</h2><span class="range low"></span><span class="bar"></span><span class="range high"></span></div><div class="cards">'+[0,1,2].map((c)=>'<div class="card"><div class="plot"><div class="yticks"><span>2</span><span>y　0</span><span>−2</span></div><canvas width="'+data.width+'" height="'+data.height+'" aria-label="'+labels[k]+'，'+['真值','5000点模型','100点模型'][c]+'"></canvas></div><div class="xticks"><span>1</span><span>x</span><span>8</span></div><div class="stats"></div></div>').join('')+'</div></section>').join('');
+slider.max=data.times.length-1;let timer=null,version=0;
+const fmt=x=>Math.abs(x)<.001&&x!==0?x.toExponential(1):Number(x.toPrecision(3)).toString();
+async function show(i){
+ slider.value=i;time.textContent='t = '+data.times[i].toFixed(1)+'  /  '+data.times.at(-1).toFixed(1);
+ const token=++version;
+ await Promise.all(data.panels.map(async(p,k)=>{
+  const row=document.querySelectorAll('section')[k], s=p.modes[scale.value], image=new Image();
+  image.src=s.images[i];await image.decode();if(token!==version)return;
+  row.querySelector('.low').textContent=fmt(s.lo);row.querySelector('.high').textContent=fmt(s.hi);
+  row.querySelector('.bar').style.background='linear-gradient(90deg,'+p.palette.join(',')+')';
+  row.querySelectorAll('canvas').forEach((cv,c)=>{
+   cv.getContext('2d').drawImage(image,c*data.width,0,data.width,data.height,0,0,data.width,data.height);
+   const stat=row.querySelectorAll('.stats')[c],r=s.ranges[i][c], pct=s.outside[i][c];
+   stat.textContent='实际范围 '+fmt(r[0])+' ～ '+fmt(r[1])+' · 超色标 '+pct.toFixed(1)+'%';
+   stat.classList.toggle('warning',pct>0);
+  });
+ }));
+}
+function start(){timer=setInterval(()=>show((Number(slider.value)+1)%data.times.length),1000/Number(speed.value));play.textContent='暂停';}
+play.onclick=()=>{if(timer){clearInterval(timer);timer=null;play.textContent='播放';}else start();};
+speed.onchange=()=>{if(timer){clearInterval(timer);start();}};
+slider.oninput=()=>show(Number(slider.value));scale.onchange=()=>show(Number(slider.value));
+document.querySelector('#prev').onclick=()=>show((Number(slider.value)-1+data.times.length)%data.times.length);
+document.querySelector('#next').onclick=()=>show((Number(slider.value)+1)%data.times.length);
+show(0);
+</script>
+</html>

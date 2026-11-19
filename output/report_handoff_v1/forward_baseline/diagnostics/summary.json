@@ -1,0 +1,244 @@
+{
+  "run": "runs\\forward_baseline",
+  "checkpoint_sha256": "3e2ac67e4110552955bf54f95a65c1d495ba442196cfba224ebd8f38700f8c68",
+  "analytic_ns_max_residual": 1.5785983631388945e-16,
+  "final_loss": {
+    "total": 0.004901010457852816,
+    "initial": 0.00012899882618513733,
+    "boundary": 0.0029925363349955062,
+    "residual": 0.0017493056049756712,
+    "gauge": 3.0169691696501107e-05
+  },
+  "loss_at_steps": {
+    "10000": 0.03639012997427124,
+    "20000": 0.02965441410747903,
+    "30000": 0.01725837785089434,
+    "40000": 0.007440212258488707,
+    "45000": 0.005747630871409729,
+    "50000": 0.004901010457852816
+  },
+  "selected_frames": [
+    {
+      "time": 0.0,
+      "full_field_relative_l2_u": 0.009317095455842965,
+      "full_field_relative_l2_v": 0.02783264095865764,
+      "full_field_relative_l2_p_centered": 0.4048513284383145,
+      "v_spatial_rms_predicted": 0.2717998411491158,
+      "v_spatial_rms_reference": 0.27294902680636324,
+      "v_rms_ratio": 0.9957897426098439
+    },
+    {
+      "time": 2.5,
+      "full_field_relative_l2_u": 0.07795056870859494,
+      "full_field_relative_l2_v": 0.28981390788017525,
+      "full_field_relative_l2_p_centered": 0.4943522351903736,
+      "v_spatial_rms_predicted": 0.23652713746487034,
+      "v_spatial_rms_reference": 0.2753320006109308,
+      "v_rms_ratio": 0.8590615581917218
+    },
+    {
+      "time": 5.0,
+      "full_field_relative_l2_u": 0.10177879267283832,
+      "full_field_relative_l2_v": 0.4107368553362524,
+      "full_field_relative_l2_p_centered": 0.5393122907844128,
+      "v_spatial_rms_predicted": 0.21698773122508733,
+      "v_spatial_rms_reference": 0.2784583759500444,
+      "v_rms_ratio": 0.7792465587891493
+    },
+    {
+      "time": 10.0,
+      "full_field_relative_l2_u": 0.12566740096647325,
+      "full_field_relative_l2_v": 0.5080545226509178,
+      "full_field_relative_l2_p_centered": 0.6927644479412983,
+      "v_spatial_rms_predicted": 0.16826392477332935,
+      "v_spatial_rms_reference": 0.2734069841957344,
+      "v_rms_ratio": 0.6154338934255892
+    },
+    {
+      "time": 15.0,
+      "full_field_relative_l2_u": 0.15771279984916484,
+      "full_field_relative_l2_v": 0.6383877477801275,
+      "full_field_relative_l2_p_centered": 0.6944336059099775,
+      "v_spatial_rms_predicted": 0.15757208248543053,
+      "v_spatial_rms_reference": 0.27048526671519824,
+      "v_rms_ratio": 0.5825532917153035
+    },
+    {
+      "time": 19.900000000000002,
+      "full_field_relative_l2_u": 0.20032555374450403,
+      "full_field_relative_l2_v": 0.7745335609652254,
+      "full_field_relative_l2_p_centered": 0.8097605751832837,
+      "v_spatial_rms_predicted": 0.12915915363406455,
+      "v_spatial_rms_reference": 0.27745320423702097,
+      "v_rms_ratio": 0.4655168931612961
+    }
+  ],
+  "residual_train_mse": 0.001749305604975671,
+  "residual_heldout_mse": 0.0019331376003699832,
+  "residual_heldout_to_train_ratio": 1.1050885533502128,
+  "residual_time_bins": [
+    {
+      "time_start": 0,
+      "time_end_exclusive": 5,
+      "train_mse": 0.001894426289811504,
+      "heldout_mse": 0.002347606005534858
+    },
+    {
+      "time_start": 5,
+      "time_end_exclusive": 10,
+      "train_mse": 0.0017284621624518118,
+      "heldout_mse": 0.0019154492718517326
+    },
+    {
+      "time_start": 10,
+      "time_end_exclusive": 15,
+      "train_mse": 0.0019527238917984966,
+      "heldout_mse": 0.0019771637958051844
+    },
+    {
+      "time_start": 15,
+      "time_end_exclusive": 20,
+      "train_mse": 0.0014278004706311158,
+      "heldout_mse": 0.0015006206963914558
+    }
+  ],
+  "boundary_errors": {
+    "inlet": {
+      "uv_mse": 0.012289199968329563,
+      "v_relative_l2": 0.8001581518160404,
+      "time_bins": [
+        {
+          "time_start": 0,
+          "time_end_exclusive": 5,
+          "v_rms_predicted": 0.07307651358619333,
+          "v_rms_reference": 0.10743435792389866,
+          "v_rms_ratio": 0.6801968662386126
+        },
+        {
+          "time_start": 5,
+          "time_end_exclusive": 10,
+          "v_rms_predicted": 0.05245171221139901,
+          "v_rms_reference": 0.100163288425447,
+          "v_rms_ratio": 0.5236620426099486
+        },
+        {
+          "time_start": 10,
+          "time_end_exclusive": 15,
+          "v_rms_predicted": 0.034073710937450784,
+          "v_rms_reference": 0.1082569711539982,
+          "v_rms_ratio": 0.3147484228889066
+        },
+        {
+          "time_start": 15,
+          "time_end_exclusive": 20,
+          "v_rms_predicted": 0.022293851007066132,
+          "v_rms_reference": 0.10920990692143634,
+          "v_rms_ratio": 0.20413762483200293
+        }
+      ]
+    },
+    "outlet": {
+      "uv_mse": 0.003268884594463614,
+      "v_relative_l2": 0.18061478776559678,
+      "time_bins": [
+        {
+          "time_start": 0,
+          "time_end_exclusive": 5,
+          "v_rms_predicted": 0.25732377332455814,
+          "v_rms_reference": 0.269319750905145,
+          "v_rms_ratio": 0.9554582330472604
+        },
+        {
+          "time_start": 5,
+          "time_end_exclusive": 10,
+          "v_rms_predicted": 0.27989375190925303,
+          "v_rms_reference": 0.2887584948450096,
+          "v_rms_ratio": 0.9693004947247883
+        },
+        {
+          "time_start": 10,
+          "time_end_exclusive": 15,
+          "v_rms_predicted": 0.2675915281287678,
+          "v_rms_reference": 0.286065178554108,
+          "v_rms_ratio": 0.9354215339360292
+        },
+        {
+          "time_start": 15,
+          "time_end_exclusive": 20,
+          "v_rms_predicted": 0.23929416914384768,
+          "v_rms_reference": 0.27110059988050444,
+          "v_rms_ratio": 0.8826766493667798
+        }
+      ]
+    },
+    "bottom": {
+      "uv_mse": 0.0005482546521270723,
+      "v_relative_l2": 0.2001111131823575,
+      "time_bins": [
+        {
+          "time_start": 0,
+          "time_end_exclusive": 5,
+          "v_rms_predicted": 0.09029618308287299,
+          "v_rms_reference": 0.09109104603179288,
+          "v_rms_ratio": 0.9912739727608082
+        },
+        {
+          "time_start": 5,
+          "time_end_exclusive": 10,
+          "v_rms_predicted": 0.08444057737198181,
+          "v_rms_reference": 0.08894512727569343,
+          "v_rms_ratio": 0.9493558552145374
+        },
+        {
+          "time_start": 10,
+          "time_end_exclusive": 15,
+          "v_rms_predicted": 0.08627369957374857,
+          "v_rms_reference": 0.0892329913285009,
+          "v_rms_ratio": 0.9668363493065245
+        },
+        {
+          "time_start": 15,
+          "time_end_exclusive": 20,
+          "v_rms_predicted": 0.07896367078884602,
+          "v_rms_reference": 0.08906821565972259,
+          "v_rms_ratio": 0.88655274167072
+        }
+      ]
+    },
+    "top": {
+      "uv_mse": 0.000552444831303216,
+      "v_relative_l2": 0.19206052785335614,
+      "time_bins": [
+        {
+          "time_start": 0,
+          "time_end_exclusive": 5,
+          "v_rms_predicted": 0.08963533356153902,
+          "v_rms_reference": 0.08903906320363199,
+          "v_rms_ratio": 1.0066967276659613
+        },
+        {
+          "time_start": 5,
+          "time_end_exclusive": 10,
+          "v_rms_predicted": 0.08902959496765488,
+          "v_rms_reference": 0.09063712066725395,
+          "v_rms_ratio": 0.9822641574692051
+        },
+        {
+          "time_start": 10,
+          "time_end_exclusive": 15,
+          "v_rms_predicted": 0.08770016022763552,
+          "v_rms_reference": 0.09237434842693158,
+          "v_rms_ratio": 0.9493995001979001
+        },
+        {
+          "time_start": 15,
+          "time_end_exclusive": 20,
+          "v_rms_predicted": 0.08236693889050284,
+          "v_rms_reference": 0.09159602074973949,
+          "v_rms_ratio": 0.8992414541189235
+        }
+      ]
+    }
+  },
+  "scope": "Full-field time metrics include IC/BC locations; PDE held-out diagnostic uses 25 test points/time. v RMS measures transverse speed, not vorticity or fluctuation energy."
+}

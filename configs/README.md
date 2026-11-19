@@ -4,6 +4,7 @@
 
 - forward_baseline.json：已完成的正问题基线，结果见同名 runs 子目录。
 - inverse_baseline.json：5,000 个无噪声观测、seed 0、50,000 步 Adam。训练完成后结果位于 `runs/inverse_baseline/`。
+- [inverse_adam5k_lbfgs50k_seed0.json](inverse_adam5k_lbfgs50k_seed0.json)：相同观测设置，从头训练 5,000 步 Adam（学习率从 0.001 降至 0.0001），随后最多 50,000 次 L-BFGS 迭代。
 
 自己设计反问题对照时，只需选一份基础配置并列出要变化的值。例如固定 100 条速度观测，比较三档噪声，每档重复三个种子：
 

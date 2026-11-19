@@ -25,7 +25,7 @@ class TrainingData:
     samples: ForwardData | PreparedData
     device: torch.device
 
-def prepare_training_data(config: Config, data_path: Path = DEFAULT_DATA) -> TrainingData:
+def prepare_training_data(config: Config, data_path: Path = DEFAULT_DATA, **forward_options) -> TrainingData:
     """known -> window IC/BC forward problem; inverse -> sparse observations."""
     config.validate()
     device_name = config.device
@@ -34,7 +34,7 @@ def prepare_training_data(config: Config, data_path: Path = DEFAULT_DATA) -> Tra
     device = torch.device(device_name)
     reference = load_data(data_path)
     if config.mode == "known":
-        samples = prepare_forward_data(reference, config)
+        samples = prepare_forward_data(reference, config, **forward_options)
         arrays = {"initial_coordinates": samples.initial_coordinates,
                   "initial_velocity": samples.initial_velocity,
                   "boundary_coordinates": samples.boundary_coordinates,
@@ -104,7 +104,21 @@ def train(config: Config, data_path: Path = DEFAULT_DATA,
             raise ValueError("Saved samples have changed")
     elif run_dir.exists():
         raise FileExistsError(f"Run already exists: {run_dir}")
-    prepared = prepare_training_data(config, data_path)
+    window_start = config.window_start
+    options = {}
+    if window_start is not None:
+        options["window_start"] = window_start
+        if config.init_from:
+            from .evaluate import _predict
+            source_dir = Path(runs_dir) / config.init_from
+            parent = load_checkpoint(source_dir / "checkpoint.pt")
+            teacher = PINN(parent["model"]["lower"], parent["model"]["upper"], config)
+            teacher.load_state_dict(parent["model"])
+            teacher.requires_grad_(False)
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu") if config.device == "auto" else torch.device(config.device)
+            teacher.to(device)
+            options["initial_predictor"] = lambda x: _predict(teacher, x, config.eval_batch_size, device)[0]
+    prepared = prepare_training_data(config, data_path, **options)
     torch.manual_seed(config.seed)
     model = PINN(prepared.samples.lower, prepared.samples.upper, config).to(prepared.device)
     model.train()
@@ -155,7 +169,8 @@ def train(config: Config, data_path: Path = DEFAULT_DATA,
     lbfgs_converged = False
     if initial:
         model.load_state_dict(initial["model"])
-        adam.load_state_dict(initial["adam"])
+        if window_start is None:
+            adam.load_state_dict(initial["adam"])
         print(f"Starting from {config.init_from} (Adam {identity['init']['adam_steps']}, "
               f"L-BFGS {identity['init']['lbfgs_steps']})", flush=True)
     if saved:

@@ -1,0 +1,28 @@
+{
+  "purpose": "production",
+  "mode": "known",
+  "task": "forward",
+  "lambda1": 1.0,
+  "lambda2": 0.01,
+  "relative_error_lambda1": 0.0,
+  "relative_error_lambda2": 0.0,
+  "relative_l2_u": 0.14118566847370764,
+  "relative_l2_v": 0.5390726475464845,
+  "relative_l2_pressure_centered": 0.6470630638174669,
+  "test_count": 99500,
+  "test_time_count": 199,
+  "pressure_reference": "prediction and reference spatially centered separately at each test time",
+  "relative_error_units": "fractions, not percentages",
+  "nonphysical_viscosity": false,
+  "training_seconds": 45797.78820359998,
+  "adam_steps": 50000,
+  "lbfgs_steps": 0,
+  "snapshot_time_indices": [
+    0,
+    100,
+    199
+  ],
+  "snapshot_scope": "full-spatial illustrations, not held-out metrics",
+  "evaluation_seconds": 0.2940124999731779,
+  "undefined_metrics": []
+}
